@@ -188,12 +188,10 @@ version = "0.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "argh" },
+    { name = "polars-ls" },
 ]
 
 [package.optional-dependencies]
-cli = [
-    { name = "argh" },
-]
 polars = [
     { name = "polars" },
 ]
@@ -210,8 +208,8 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "argh", specifier = ">=0.31.3" },
-    { name = "argh", marker = "extra == 'cli'", specifier = ">=0.31.3" },
     { name = "polars", marker = "extra == 'polars'", specifier = ">=1.21.0" },
+    { name = "polars-ls", specifier = ">=0.4.0" },
     { name = "polars-lts-cpu", marker = "extra == 'polars-lts-cpu'", specifier = ">=1.21.0" },
 ]
 
@@ -219,6 +217,18 @@ requires-dist = [
 dev = [
     { name = "inline-snapshot", extras = ["black"], specifier = ">=0.19.3" },
     { name = "pytest", specifier = ">=8.3.4" },
+]
+
+[[package]]
+name = "polars-ls"
+version = "0.4.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "argh" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/56/c8/558268bb259c7292b812afffd75e5eff2eb65f88eaf9da4521c2d7087c6f/polars_ls-0.4.0.tar.gz", hash = "sha256:ad994a565afd6807da9fe5f98d361cbf8a9e108ee844413b39bf7228c72f3763", size = 21675 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/36/28/3c2d85ce1bf2ba594253de9ec83bc6790193dd26910de6ac1ee212adbc96/polars_ls-0.4.0-py3-none-any.whl", hash = "sha256:2afd1e2bad69c8b2b6e63badd329e3cac92428b0fd84cf7a6aa495c98d598d5a", size = 19490 },
 ]
 
 [[package]]

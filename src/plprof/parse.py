@@ -136,12 +136,3 @@ def parse_lprof(
             "total_time", "source_file", "function", "timer_unit"
         )
         return metadata, lines
-
-
-def cli():
-    metadata, lines = parse_lprof(Path("profile_output_2025-02-04T002856.txt"))
-    print(lines)
-
-
-if __name__ == "__main__":
-    cli()
