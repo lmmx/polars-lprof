@@ -31,7 +31,7 @@ plprof profile_output.txt
 Use it from Python as a library:
 
 ```python
-from plprof import 
+from plprof import parse_lprof
 
-metadata, lines = parse_lprof(Path("profile_output.txt"))
+metadata, lines = parse_lprof("profile_output.txt")
 ```

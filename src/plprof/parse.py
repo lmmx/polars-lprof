@@ -1,13 +1,62 @@
+from io import StringIO
 from pathlib import Path
 from typing import Tuple
 
 import polars as pl
+from pols import ls
 
 
 def parse_lprof(
-    source_file: Path, merge_metadata: bool = False
+    *sources: Path, merge_metadata: bool = False
 ) -> tuple[pl.DataFrame, pl.DataFrame] | pl.DataFrame:
+    # In case we need to tell the user what sources were used (default: ".")
+    source_str = " ".join(f"{src}" for src in sources) if sources else "."
     # Read file with row numbers and filter out empty lines
+    if len(sources) > 1:
+        merge_metadata = True
+
+    try:
+        ls_errors = StringIO()
+        paths = ls(
+            *sources,
+            to_dict=True,
+            merge_all=True,
+            keep="path",
+            print_to="devnull",
+            error_to=ls_errors,
+        ).pop("", None)
+    except Exception as e:
+        error_log = ls_errors.getvalue().rstrip()
+        raise SystemExit(
+            f"plprof: A fatal error occurred: {e}.\n\nError log from polars-ls:\n{error_log}"
+        ) from e
+    else:
+        if paths is None:
+            raise SystemExit(f"plprof: No files found in {source_str}, exitting.")
+
+    lprof_output_filter = pl.col("path").map_elements(
+        lambda p: p.name.startswith("profile_output"), return_dtype=pl.Boolean
+    )
+    paths = paths.filter(lprof_output_filter).drop("name")
+    if paths.is_empty():
+        raise SystemExit(
+            f"plprof: No line profiler output files found in {source_str}, exitting."
+        )
+    breakpoint()
+
+    results = []
+    for profile_report in paths.get_column():
+        if merge_metadata:
+            result = merged
+        else:
+            lines = merged.filter(pl.col("line_contents").is_not_null()).drop(
+                "total_time", "source_file", "function", "timer_unit"
+            )
+            result = metadata, lines
+        results.append(result)
+
+
+def parse_lprof_output(source_file: Path) -> pl.DataFrame:
     df = (
         pl.read_csv(
             source_file, separator="\x1e", has_header=False, new_columns=["line"]
@@ -129,10 +178,4 @@ def parse_lprof(
         source_file=source_file_col,
         function=function_col,
     )
-    if merge_metadata:
-        return merged
-    else:
-        lines = merged.filter(pl.col("line_contents").is_not_null()).drop(
-            "total_time", "source_file", "function", "timer_unit"
-        )
-        return metadata, lines
+    return merged
