@@ -1,0 +1,36 @@
+[project]
+name = "polars-lprof"
+version = "0.1.0"
+description = "Read line profiler reports into Polars DataFrames"
+readme = "README.md"
+authors = [
+    { name = "Louis Maddox", email = "louismmx@gmail.com" }
+]
+requires-python = ">=3.12"
+dependencies = []
+
+[project.scripts]
+plprof = "polars_lprof.cli:cli"
+
+[project.optional-dependencies]
+polars-lts-cpu = [
+    "polars-lts-cpu>=1.21.0",
+]
+polars = [
+    "polars>=1.21.0",
+]
+cli = [
+    "argh>=0.31.3",
+]
+
+[build-system]
+requires = [
+    "pdm-backend",
+]
+build-backend = "pdm.backend"
+
+[dependency-groups]
+dev = [
+    "inline-snapshot[black]>=0.19.3",
+    "pytest>=8.3.4",
+]
