@@ -1,9 +1,36 @@
-from io import StringIO
+from io import StringIO, TextIOBase
 from pathlib import Path
 from typing import Tuple
 
 import polars as pl
 from pols import ls
+
+
+def lprof_to_buf(
+    lprof_file: Path, skip_zero=False, sort=False, summarize=False
+) -> TextIOBase:
+    """Load a .lprof file with line_profiler's internal API.
+
+    Produce a text report (same as `python -m line_profiler`).
+    """
+    import line_profiler
+
+    lstats = line_profiler.load_stats(str(lprof_file))
+
+    # We'll capture the output of show_text into a StringIO buffer
+    buf = StringIO()
+    line_profiler.show_text(
+        lstats.timings,
+        unit=lstats.unit,
+        output_unit=None,  # or "seconds", "milliseconds", etc.
+        stripzeros=skip_zero,
+        rich=False,  # set True if you want color, etc.
+        sort=sort,
+        summarize=summarize,
+        stream=buf,
+    )
+    buf.seek(0)
+    return buf
 
 
 def parse_lprof(
@@ -37,23 +64,28 @@ def parse_lprof(
     lprof_output_filter = pl.col("path").map_elements(
         lambda p: p.name.startswith("profile_output"), return_dtype=pl.Boolean
     )
-    paths = paths.filter(lprof_output_filter).drop("name")
-    if paths.is_empty():
+    report_paths = paths.filter(lprof_output_filter).drop("name")
+    lprof_pkl_filter = pl.col("path").map_elements(
+        lambda p: p.suffix == ".lprof", return_dtype=pl.Boolean
+    )
+    lprof_pkl_paths = paths.filter(lprof_pkl_filter).drop("name")
+    lprof_bufs = pl.col("path").map_elements(lprof_to_buf, return_dtype=pl.Object)
+    if report_paths.is_empty() and lprof_pkl_paths.is_empty():
         raise SystemExit(
             f"plprof: No line profiler output files found in {source_str}, exitting."
         )
-    breakpoint()
+
+    paths = pl.concat([report_paths, lprof_pkl_paths.with_columns(lprof_bufs)])
 
     results = []
-    for profile_report in paths.get_column():
-        if merge_metadata:
-            result = merged
-        else:
-            lines = merged.filter(pl.col("line_contents").is_not_null()).drop(
-                "total_time", "source_file", "function", "timer_unit"
-            )
-            result = metadata, lines
+    for profile_report in paths.get_column("path"):
+        merged = parse_lprof_output(profile_report)
+        lines = merged.filter(pl.col("line_contents").is_not_null()).drop(
+            "total_time", "source_file", "function", "timer_unit"
+        )
+        result = lines.select(pl.all().sort_by("time"))
         results.append(result)
+    return results
 
 
 def parse_lprof_output(source_file: Path) -> pl.DataFrame:
