@@ -1,0 +1,15 @@
+Timer unit: 1e-09 s
+
+Total time: 3.471e-06 s
+File: /home/louis/dev/plprof/example/example_profiled_script.py
+Function: foo at line 3
+
+Line #      Hits         Time  Per Hit   % Time  Line Contents
+==============================================================
+     3                                           @profile
+     4                                           def foo():
+     5         4       1695.0    423.8     48.8      for i in range(3):
+     6         3        932.0    310.7     26.9          x = i * 2
+     7         1        844.0    844.0     24.3      return x
+
+  0.00 seconds - /home/louis/dev/plprof/example/example_profiled_script.py:3 - foo

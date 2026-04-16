@@ -21,16 +21,13 @@ authors = [
 requires-python = ">=3.12"
 dependencies = [
   "argh>=0.31.3",
+  "line-profiler>=5.0.2",
+  "polars>=1.30.0",
   "polars-ls>=0.5.0"
 ]
 
 [project.optional-dependencies]
-polars-lts-cpu = [
-  "polars-lts-cpu>=1.21.0"
-]
-polars = [
-  "polars>=1.21.0"
-]
+lts-cpu = ["polars[rtcompat]>=1.30"]
 
 [project.scripts]
 plprof = "plprof.cli:cli"
