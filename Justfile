@@ -4,3 +4,7 @@ import ".just/test.just"
 
 pc-fix:
   prek run --all-files
+
+[working-directory: "example"]
+demo:
+  ./run_plprof.sh
