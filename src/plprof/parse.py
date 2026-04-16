@@ -1,6 +1,5 @@
 from io import StringIO, TextIOBase
 from pathlib import Path
-from typing import Tuple
 
 import polars as pl
 from pols import ls
@@ -34,7 +33,8 @@ def lprof_to_buf(
 
 
 def parse_lprof(
-    *sources: Path, merge_metadata: bool = False
+    *sources: Path,
+    merge_metadata: bool = False,
 ) -> tuple[pl.DataFrame, pl.DataFrame] | pl.DataFrame:
     # In case we need to tell the user what sources were used (default: ".")
     source_str = " ".join(f"{src}" for src in sources) if sources else "."
@@ -55,14 +55,15 @@ def parse_lprof(
     except Exception as e:
         error_log = ls_errors.getvalue().rstrip()
         raise SystemExit(
-            f"plprof: A fatal error occurred: {e}.\n\nError log from polars-ls:\n{error_log}"
+            f"plprof: A fatal error occurred: {e}.\n\nError log from polars-ls:\n{error_log}",
         ) from e
     else:
         if paths is None:
             raise SystemExit(f"plprof: No files found in {source_str}, exitting.")
 
     lprof_output_filter = pl.col("path").map_elements(
-        lambda p: p.name.startswith("profile_output"), return_dtype=pl.Boolean
+        lambda p: p.name.startswith("profile_output"),
+        return_dtype=pl.Boolean,
     )
     report_paths = paths.filter(lprof_output_filter).drop("name")
     lprof_pkl_filter = pl.col("path").map_elements(
@@ -72,7 +73,7 @@ def parse_lprof(
     lprof_bufs = pl.col("path").map_elements(lprof_to_buf, return_dtype=pl.Object)
     if report_paths.is_empty() and lprof_pkl_paths.is_empty():
         raise SystemExit(
-            f"plprof: No line profiler output files found in {source_str}, exitting."
+            f"plprof: No line profiler output files found in {source_str}, exitting.",
         )
 
     paths = pl.concat([report_paths, lprof_pkl_paths.with_columns(lprof_bufs)])
@@ -81,7 +82,10 @@ def parse_lprof(
     for profile_report in paths.get_column("path"):
         merged = parse_lprof_output(profile_report)
         lines = merged.filter(pl.col("line_contents").is_not_null()).drop(
-            "total_time", "source_file", "function", "timer_unit"
+            "total_time",
+            "source_file",
+            "function",
+            "timer_unit",
         )
         result = lines.select(pl.all().sort_by("time"))
         results.append(result)
@@ -91,7 +95,10 @@ def parse_lprof(
 def parse_lprof_output(source_file: Path) -> pl.DataFrame:
     df = (
         pl.read_csv(
-            source_file, separator="\x1e", has_header=False, new_columns=["line"]
+            source_file,
+            separator="\x1e",
+            has_header=False,
+            new_columns=["line"],
         )
         .with_row_index("row_number")
         .filter(pl.col("line").str.strip_chars().is_not_null())
@@ -169,12 +176,12 @@ def parse_lprof_output(source_file: Path) -> pl.DataFrame:
     data_pattern = r"""(?x)
         ^
         (?:  # Optional line number and code indentation
-            \s*(?P<line_num>\d+)\s+ 
-            (?P<hits>\d+)\s+ 
-            (?P<time>[\d.]+)\s+ 
-            (?P<per_hit>[\d.]+)\s+ 
-            (?P<percent_time>[\d.]+)\s+ 
-            (?P<contents>.*) 
+            \s*(?P<line_num>\d+)\s+
+            (?P<hits>\d+)\s+
+            (?P<time>[\d.]+)\s+
+            (?P<per_hit>[\d.]+)\s+
+            (?P<percent_time>[\d.]+)\s+
+            (?P<contents>.*)
         )
     """
 
@@ -190,7 +197,7 @@ def parse_lprof_output(source_file: Path) -> pl.DataFrame:
                 pl.col("per_hit").cast(pl.Float64),
                 pl.col("percent_time").cast(pl.Float64),
                 pl.col("contents").str.strip_chars().alias("line_contents"),
-            ]
+            ],
         )
     )
     # print("Parsed data:", parsed_data)
