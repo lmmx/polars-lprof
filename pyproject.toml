@@ -1,36 +1,41 @@
+[build-system]
+build-backend = "uv_build"
+requires = ["uv_build>=0.11.6,<0.12"]
+
+[dependency-groups]
+dev = [
+  "inline-snapshot[black]>=0.19.3",
+  "pdbpp>=0.12.1"
+]
+test = [
+  "pytest>=8.3.4"
+]
+
 [project]
 name = "polars-lprof"
 version = "0.1.1"
 description = "Read line profiler reports into Polars DataFrames"
 readme = "README.md"
 authors = [
-    { name = "Louis Maddox", email = "louismmx@gmail.com" },
+  {name = "Louis Maddox", email = "louismmx@gmail.com"}
 ]
 requires-python = ">=3.12"
 dependencies = [
-    "argh>=0.31.3",
-    "polars-ls>=0.5.0",
+  "argh>=0.31.3",
+  "line-profiler>=5.0.2",
+  "polars>=1.30.0",
+  "polars-ls>=0.5.0"
 ]
+
+[project.optional-dependencies]
+lts-cpu = ["polars[rtcompat]>=1.30"]
 
 [project.scripts]
 plprof = "plprof.cli:cli"
 
-[project.optional-dependencies]
-polars-lts-cpu = [
-    "polars-lts-cpu>=1.21.0",
-]
-polars = [
-    "polars>=1.21.0",
-]
+[tool.uv]
+default-groups = "all"
 
-[build-system]
-requires = [
-    "pdm-backend",
-]
-build-backend = "pdm.backend"
-
-[dependency-groups]
-dev = [
-    "inline-snapshot[black]>=0.19.3",
-    "pytest>=8.3.4",
-]
+[tool.uv.build-backend]
+module-name = "plprof"
+module-root = "src"
