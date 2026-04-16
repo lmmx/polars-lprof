@@ -1,0 +1,1 @@
+LINE_PROFILE=1 python example_profiled_script.py

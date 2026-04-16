@@ -8,3 +8,7 @@ pc-fix:
 [working-directory: "example"]
 demo:
   ./run_plprof.sh
+
+[working-directory: "example"]
+demo-multi:
+  ./run_plprof_multi.sh

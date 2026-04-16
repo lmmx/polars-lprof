@@ -82,18 +82,42 @@ def parse_lprof(
 
     paths = pl.concat([report_paths, lprof_pkl_paths.with_columns(lprof_bufs)])
 
-    results = []
-    for profile_report in paths.get_column("path"):
+    META_COLS = ["timer_unit", "total_time", "source_file", "function"]
+
+    line_frames: list[pl.DataFrame] = []
+    meta_frames: list[pl.DataFrame] = []
+
+    for file_id, profile_report in enumerate(paths.get_column("path")):
         merged = parse_lprof_output(profile_report)
-        lines = merged.filter(pl.col("line_contents").is_not_null()).drop(
-            "total_time",
-            "source_file",
-            "function",
-            "timer_unit",
-        )
-        result = lines.select(pl.all().sort_by("time"))
-        results.append(result)
-    return results
+
+        # Keep only real code lines
+        lines = merged.filter(pl.col("line_contents").is_not_null())
+
+        if merge_metadata:
+            # Extract one row of metadata per file
+            meta = (
+                lines.select(META_COLS)
+                .head(1)
+                .with_columns(file_id=pl.lit(file_id, dtype=pl.UInt32))
+            )
+            meta_frames.append(meta)
+
+            # Remove metadata from line rows, add join key
+            lines = lines.drop(META_COLS).with_columns(
+                file_id=pl.lit(file_id, dtype=pl.UInt32),
+            )
+
+        # Always sort lines by time (same as before)
+        line_frames.append(lines.sort("time"))
+
+    # Combine all files
+    lines_df = pl.concat(line_frames, how="vertical_relaxed")
+
+    if merge_metadata:
+        metadata_df = pl.concat(meta_frames, how="vertical_relaxed")
+        return metadata_df, lines_df
+
+    return lines_df
 
 
 def parse_lprof_output(source_file: Path) -> pl.DataFrame:
@@ -207,7 +231,7 @@ def parse_lprof_output(source_file: Path) -> pl.DataFrame:
     # print("Parsed data:", parsed_data)
 
     # Add metadata as columns
-    tu_col = pl.lit(metadata["Timer unit"].str.split(" ").first()).alias("timer_unit")
+    tu_col = pl.lit(metadata["Timer unit"].first()).alias("timer_unit")
     total_time_col = (
         pl.lit(metadata["Total time"].str.split(" ").explode().first())
         .cast(pl.Float64)
