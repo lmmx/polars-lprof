@@ -1,5 +1,12 @@
 # polars-lprof
 
+<!-- [![downloads](https://static.pepy.tech/badge/polars-lprof/month)](https://pepy.tech/project/polars-lprof) -->
+[![uv](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/uv/main/assets/badge/v0.json)](https://github.com/astral-sh/uv)
+[![PyPI](https://img.shields.io/pypi/v/polars-lprof.svg)](https://pypi.org/project/polars-lprof)
+[![Supported Python versions](https://img.shields.io/pypi/pyversions/polars-lprof.svg)](https://pypi.org/project/polars-lprof)
+[![License](https://img.shields.io/pypi/l/polars-lprof.svg)](https://pypi.python.org/pypi/polars-lprof)
+[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/lmmx/polars-lprof/master.svg)](https://results.pre-commit.ci/latest/github/lmmx/polars-lprof/master)
+
 Read `line_profiler` reports into Polars DataFrames
 
 ## Installation

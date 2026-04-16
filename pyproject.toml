@@ -14,6 +14,19 @@ test = [
 [project]
 name = "polars-lprof"
 version = "0.1.1"
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Developers",
+  "Natural Language :: English",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
+  "Programming Language :: Python :: 3.15",
+  "Programming Language :: Python :: Implementation :: CPython",
+  "Programming Language :: Python"
+]
 description = "Read line profiler reports into Polars DataFrames"
 readme = "README.md"
 authors = [
@@ -26,12 +39,21 @@ dependencies = [
   "polars>=1.30.0",
   "polars-ls>=0.5.0"
 ]
+keywords = ["polars", "profiling", "line-profiler", "performance", "dataframes"]
+
+[project.license]
+text = "MIT"
 
 [project.optional-dependencies]
 lts-cpu = ["polars[rtcompat]>=1.30"]
 
 [project.scripts]
 plprof = "plprof.cli:cli"
+
+[project.urls]
+Homepage = "https://github.com/lmmx/polars-lprof"
+Repository = "https://github.com/lmmx/polars-lprof.git"
+Issues = "https://github.com/lmmx/polars-lprof/issues"
 
 [tool.uv]
 default-groups = "all"
