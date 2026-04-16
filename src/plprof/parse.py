@@ -6,7 +6,10 @@ from pols import ls
 
 
 def lprof_to_buf(
-    lprof_file: Path, skip_zero=False, sort=False, summarize=False
+    lprof_file: Path,
+    skip_zero=False,
+    sort=False,
+    summarize=False,
 ) -> TextIOBase:
     """Load a .lprof file with line_profiler's internal API.
 
@@ -67,7 +70,8 @@ def parse_lprof(
     )
     report_paths = paths.filter(lprof_output_filter).drop("name")
     lprof_pkl_filter = pl.col("path").map_elements(
-        lambda p: p.suffix == ".lprof", return_dtype=pl.Boolean
+        lambda p: p.suffix == ".lprof",
+        return_dtype=pl.Boolean,
     )
     lprof_pkl_paths = paths.filter(lprof_pkl_filter).drop("name")
     lprof_bufs = pl.col("path").map_elements(lprof_to_buf, return_dtype=pl.Object)
