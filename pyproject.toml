@@ -4,7 +4,9 @@ requires = ["uv_build>=0.11.6,<0.12"]
 
 [dependency-groups]
 dev = [
-  "inline-snapshot[black]>=0.19.3",
+  "inline-snapshot[black]>=0.19.3"
+]
+test = [
   "pytest>=8.3.4"
 ]
 
