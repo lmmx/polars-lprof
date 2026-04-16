@@ -42,9 +42,6 @@ def parse_lprof(
     # In case we need to tell the user what sources were used (default: ".")
     source_str = " ".join(f"{src}" for src in sources) if sources else "."
     # Read file with row numbers and filter out empty lines
-    if len(sources) > 1:
-        merge_metadata = True
-
     try:
         ls_errors = StringIO()
         paths = ls(
@@ -81,6 +78,9 @@ def parse_lprof(
         )
 
     paths = pl.concat([report_paths, lprof_pkl_paths.with_columns(lprof_bufs)])
+
+    if paths.height > 1:
+        merge_metadata = True
 
     META_COLS = ["timer_unit", "total_time", "source_file", "function"]
 
